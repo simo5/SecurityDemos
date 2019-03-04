@@ -1,0 +1,40 @@
+---
+- hosts: all
+
+  become: yes
+  become_method: sudo
+  become_user: lab-user
+
+  vars:
+    LABS_LOCAL: "/home/lab-user/labs_data"
+    LABS_CONTENT_PART: "2019Labs/CustomSecurityContent/documentation"
+    LAB_2_LABEL: "2_content_creation"
+    CACC_LOCAL: "/home/lab-user/complianceAsCode"
+    LABS_ROOT: "/home/lab-user/labs"
+
+  tasks:
+    - name: Clone the Labs Git repository
+      git:
+        repo: 'https://github.com/RedHatDemos/SecurityDemos.git'
+        dest: "{{ LABS_LOCAL }}"
+
+    - name: Clone the CaC/c Git repository
+      git:
+        repo: 'https://github.com/ComplianceAsCode/content.git'
+        dest: "{{ CACC_LOCAL }}"
+
+    - name: Creates directory for Lab 2
+      file:
+        path: "{{ LABS_ROOT }}/{{ LAB_2_LABEL }}"
+        state: directory
+
+    - name: Clone the CaC/c Git for Lab 2
+      git:
+        repo: "{{ CACC_LOCAL }}"
+        version: 'v0.1.43'
+        dest: "{{ LABS_ROOT }}/{{ LAB_2_LABEL }}/complianceAsCode"
+
+    - name: Copy the lab 2 documentation to the working directory
+      copy:
+        src: "{{ LABS_LOCAL }}/{{ LABS_CONTENT_PART }}/{{ LAB_2_LABEL }}"
+        dest: "{{ LABS_ROOT }}/{{ LAB_2_LABEL }}/documentation"
